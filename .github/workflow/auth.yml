@@ -3,27 +3,39 @@ name: Build and Deploy ConnectHub Authentication to Azure
 on:
   push:
     branches:
-      - ConnectHub.Authentication   # your branch
+      - ConnectHub.Authentication
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
+      # 1. Checkout
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
+      # 2. Setup .NET
       - name: Setup .NET
-        uses: actions/setup-dotnet@v3
+        uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '8.0.x'
 
-      - name: Publish Auth Service
-        run: dotnet publish ./ConnectHub.Authentication/ConnectHub.Authentication.csproj -c Release -o publish
+      # 3. Restore
+      - name: Restore dependencies
+        run: dotnet restore ./ConnectHub.Authentication/ConnectHub.Authentication.csproj
 
-      - name: Deploy to Azure
-        uses: azure/webapps-deploy@v2
+      # 4. Build
+      - name: Build
+        run: dotnet build ./ConnectHub.Authentication/ConnectHub.Authentication.csproj --configuration Release --no-restore
+
+      # 5. Publish
+      - name: Publish
+        run: dotnet publish ./ConnectHub.Authentication/ConnectHub.Authentication.csproj -c Release -o ./publish
+
+      # 6. Deploy
+      - name: Deploy to Azure Web App
+        uses: azure/webapps-deploy@v3
         with:
           app-name: ConnectHub-Auth
-          publish-profile: ${{ secrets.AUTH}}
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
           package: ./publish
