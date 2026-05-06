@@ -92,12 +92,12 @@ app.UseSwaggerUI(c =>
 {
     c.SwaggerEndpoint("/swagger/v1/swagger.json", "ConnectHub Gateway v1");
     
-    // Consolidated Microservices Swagger (Direct Links)
-    c.SwaggerEndpoint("https://real-time-chat-application-1-7bdu.onrender.com/swagger/v1/swagger.json", "Auth Service");
-    c.SwaggerEndpoint("https://chat-room-service-mtqt.onrender.com/swagger/v1/swagger.json", "ChatRoom Service");
-    c.SwaggerEndpoint("https://message-service-2rib.onrender.com/swagger/v1/swagger.json", "Messaging Service");
-    c.SwaggerEndpoint("https://notification-service-kxnb.onrender.com/swagger/v1/swagger.json", "Notification Service");
-    c.SwaggerEndpoint("https://media-service-l8bp.onrender.com/swagger/v1/swagger.json", "Media API");
+    // Consolidated Microservices Swagger (Proxied through Gateway)
+    c.SwaggerEndpoint("/api/users/swagger/v1/swagger.json", "Auth Service");
+    c.SwaggerEndpoint("/api/rooms/swagger/v1/swagger.json", "ChatRoom Service");
+    c.SwaggerEndpoint("/api/messages/swagger/v1/swagger.json", "Messaging Service");
+    c.SwaggerEndpoint("/api/notifications/swagger/v1/swagger.json", "Notification Service");
+    c.SwaggerEndpoint("/api/media/swagger/v1/swagger.json", "Media API");
     
     c.RoutePrefix = "swagger";
 });
