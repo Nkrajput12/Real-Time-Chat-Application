@@ -1,0 +1,6 @@
+@ConnectHub.Presence_Service_HostAddress = http://localhost:5030
+
+GET {{ConnectHub.Presence_Service_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
