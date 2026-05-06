@@ -91,6 +91,14 @@ app.UseSwagger();
 app.UseSwaggerUI(c =>
 {
     c.SwaggerEndpoint("/swagger/v1/swagger.json", "ConnectHub Gateway v1");
+    
+    // Consolidated Microservices Swagger
+    c.SwaggerEndpoint("/api/users/swagger/v1/swagger.json", "Auth Service");
+    c.SwaggerEndpoint("/api/rooms/swagger/v1/swagger.json", "ChatRoom Service");
+    c.SwaggerEndpoint("/api/messages/swagger/v1/swagger.json", "Messaging Service");
+    c.SwaggerEndpoint("/api/notifications/swagger/v1/swagger.json", "Notification Service");
+    c.SwaggerEndpoint("/api/media/swagger/v1/swagger.json", "Media API");
+    
     c.RoutePrefix = "swagger";
 });
 
