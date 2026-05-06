@@ -20,7 +20,7 @@ builder.Services.AddScoped<IChatRoomRepository, ChatRoomRepository>();
 builder.Services.AddScoped<IChatRoomService, ChatRoomService>();
 
 builder.Services.AddControllers()
-    .AddJsonOptions(options => 
+    .AddJsonOptions(options =>
     {
         options.JsonSerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
     });
@@ -49,7 +49,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
     options.SwaggerDoc("v1", new OpenApiInfo { Title = "ConnectHub Message Service", Version = "v1" });
-    
+
     options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         Name = "Authorization",
@@ -107,11 +107,13 @@ using (var scope = app.Services.CreateScope())
 // 6. Middleware Pipeline
 app.UseMiddleware<GlobalExceptionMiddleware>();
 
-if (app.Environment.IsDevelopment())
+// Enable Swagger in all environments for deployment testing
+app.UseSwagger();
+app.UseSwaggerUI(c =>
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "ConnectHub ChatRoom API V1");
+    c.RoutePrefix = "swagger"; // Swagger will be at /swagger
+});
 
 app.UseCors("AllowFrontend");
 
