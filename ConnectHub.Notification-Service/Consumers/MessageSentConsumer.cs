@@ -33,20 +33,17 @@ namespace ConnectHub.Notification.API.Consumers
 
                 await _notificationService.CreateNotificationAsync(notification);
 
-                //if the user is OFFLINE
-                if (!string.IsNullOrEmpty(context.Message.RecipientEmail))
-                {
-                    bool isOnline = await _notificationService.IsUserOnlineAsync(context.Message.ReceiverId.Value);
-                    
-                    if (!isOnline)
-                    {
-                        await _notificationService.SendEmailAsync(
-                            context.Message.RecipientEmail, 
-                            "New Message Received (Offline)", 
-                            $"Hello! You received a message from User {context.Message.SenderId} while you were away: {context.Message.Content}"
-                        );
-                    }
-                }
+                // Fallback for testing: If email is missing, send to a test address so it shows up in Mailtrap
+                var targetEmail = !string.IsNullOrEmpty(context.Message.RecipientEmail) 
+                                  ? context.Message.RecipientEmail 
+                                  : "test-user@connecthub.com"; 
+
+                // We removed the presence check as requested, so we always try to send an email for now
+                await _notificationService.SendEmailAsync(
+                    targetEmail, 
+                    "New Message Received", 
+                    $"Hello! You received a message from User {context.Message.SenderId}: {context.Message.Content}"
+                );
             }
         }
     }

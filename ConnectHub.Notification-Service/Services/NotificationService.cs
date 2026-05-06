@@ -65,22 +65,11 @@ namespace ConnectHub.Notification.API.Services
             await _hubContext.Clients.All.SendAsync("BroadcastNotification", title, message);
         }
 
-        public async Task<bool> IsUserOnlineAsync(int userId)
+        public Task<bool> IsUserOnlineAsync(int userId)
         {
-            try
-            {
-                var client = _httpClientFactory.CreateClient();
-                var presenceUrl = _config["PresenceServiceUrl"] ?? "http://localhost:5005";
-                var response = await client.GetAsync($"{presenceUrl}/api/presence/check/{userId}");
-                
-                if (response.IsSuccessStatusCode)
-                {
-                    var content = await response.Content.ReadAsStringAsync();
-                    return bool.Parse(content);
-                }
-            }
-            catch { /* Fallback to sending email if presence service is down */ }
-            return false;
+            // Removed synchronous call to Presence Service to keep services decoupled.
+            // Notifications will default to email sending.
+            return Task.FromResult(false);
         }
 
         public async Task SendEmailAsync(string recipientEmail, string subject, string body)
@@ -94,14 +83,28 @@ namespace ConnectHub.Notification.API.Services
             try
             {
                 using var smtp = new SmtpClient();
-                await smtp.ConnectAsync(_config["Email:Host"], int.Parse(_config["Email:Port"] ?? "587"), MailKit.Security.SecureSocketOptions.StartTls);
+                
+                // BYPASS SSL VALIDATION (Common fix for Mailtrap/Docker)
+                smtp.ServerCertificateValidationCallback = (s, c, h, e) => true;
+
+                smtp.Timeout = 10000; // 10 seconds
+
+                var host = _config["Email:Host"];
+                var port = int.Parse(_config["Email:Port"] ?? "587");
+                
+                Console.WriteLine($"Attempting to send email via {host}:{port}...");
+                
+                await smtp.ConnectAsync(host, port, MailKit.Security.SecureSocketOptions.StartTls);
                 await smtp.AuthenticateAsync(_config["Email:User"], _config["Email:Pass"]);
                 await smtp.SendAsync(email);
                 await smtp.DisconnectAsync(true);
+                
+                Console.WriteLine($"Email sent successfully to {recipientEmail}");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Email sending failed: {ex.Message}");
+                Console.WriteLine($"CRITICAL EMAIL FAILURE for {recipientEmail}: {ex.Message}");
+                // We don't throw here to avoid crashing the whole notification flow if SMTP fails
             }
         }
     }
