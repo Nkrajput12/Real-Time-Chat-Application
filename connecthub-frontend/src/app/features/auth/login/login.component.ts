@@ -4,7 +4,7 @@ import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angula
 import { Router, RouterLink, ActivatedRoute } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 import { SignalRService } from '../../../core/services/signalr.service';
-import { environment } from '../../../environments/environment';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-login',
