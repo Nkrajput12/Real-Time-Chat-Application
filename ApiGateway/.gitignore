@@ -1,0 +1,7 @@
+[Bb]in/
+[Oo]bj/
+# appsettings.json is now tracked to support YARP routing deployment
+appsettings.Development.json
+*.user
+.vscode/
+.vs/

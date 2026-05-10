@@ -1,0 +1,61 @@
+<div class="auth-bg">
+      <div class="auth-card">
+        <div class="auth-logo">
+          <div class="auth-logo-icon">💬</div>
+          <div class="auth-logo-text">Connect<span>Hub</span></div>
+        </div>
+
+        <h2 style="margin-bottom:6px">Create your account</h2>
+        <p class="text-muted text-sm" style="margin-bottom:28px">Join ConnectHub and start chatting instantly</p>
+
+        <div *ngIf="error" class="alert alert-error animate-fade" style="margin-bottom:16px">
+          <span>⚠️</span> {{ error }}
+        </div>
+        <div *ngIf="success" class="alert alert-success animate-fade" style="margin-bottom:16px">
+          <span>✅</span> {{ success }}
+        </div>
+
+        <form [formGroup]="form" (ngSubmit)="onSubmit()" style="display:flex;flex-direction:column;gap:14px">
+          <div class="form-group">
+            <label class="form-label">Username</label>
+            <input class="input-field" formControlName="userName" placeholder="Choose a username" autocomplete="username" />
+            <span *ngIf="f['userName'].touched && f['userName'].errors?.['required']" class="form-error">Required</span>
+            <span *ngIf="f['userName'].touched && f['userName'].errors?.['minlength']" class="form-error">Min 3 characters</span>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Display Name</label>
+            <input class="input-field" formControlName="displayName" placeholder="How should we call you?" />
+            <span *ngIf="f['displayName'].touched && f['displayName'].errors?.['required']" class="form-error">Required</span>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Email</label>
+            <input class="input-field" type="email" formControlName="email" placeholder="your@email.com" autocomplete="email" />
+            <span *ngIf="f['email'].touched && f['email'].errors?.['required']" class="form-error">Required</span>
+            <span *ngIf="f['email'].touched && f['email'].errors?.['email']" class="form-error">Invalid email</span>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Password</label>
+            <div style="position:relative">
+              <input class="input-field" [type]="showPass ? 'text' : 'password'" formControlName="password" placeholder="Min 8 characters" style="padding-right:42px" />
+              <button type="button" class="btn-icon" (click)="showPass = !showPass" style="position:absolute;right:4px;top:50%;transform:translateY(-50%)">
+                {{ showPass ? '🙈' : '👁️' }}
+              </button>
+            </div>
+            <span *ngIf="f['password'].touched && f['password'].errors?.['required']" class="form-error">Required</span>
+            <span *ngIf="f['password'].touched && f['password'].errors?.['minlength']" class="form-error">Min 8 characters</span>
+          </div>
+
+          <button type="submit" class="btn btn-primary w-full" [disabled]="loading" style="margin-top:4px;padding:12px">
+            <span *ngIf="loading" class="spinner" style="width:16px;height:16px;border-width:2px"></span>
+            {{ loading ? 'Creating account...' : 'Create Account' }}
+          </button>
+        </form>
+
+        <p class="text-muted text-sm" style="text-align:center;margin-top:24px">
+          Already have an account? <a routerLink="/auth/login" class="text-accent">Sign in</a>
+        </p>
+      </div>
+    </div>

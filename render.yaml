@@ -1,0 +1,12 @@
+services:
+  # ConnectHub Angular Frontend - Static Site
+  - type: web
+    name: connecthub-frontend
+    runtime: static
+    buildCommand: cd connecthub-frontend && npm install && npm run build
+    staticPublishPath: connecthub-frontend/dist/connecthub-frontend/browser
+    plan: free
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html

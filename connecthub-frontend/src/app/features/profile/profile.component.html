@@ -1,0 +1,86 @@
+<div class="page">
+      <div class="profile-card">
+        <h1 style="font-size:1.5rem;font-weight:800;margin-bottom:28px">My Profile</h1>
+
+        <!-- Avatar + name -->
+        <div class="avatar-section">
+          <input type="file" #avatarInput (change)="onAvatarChange($event)" accept="image/*" style="display:none" />
+          <div class="big-avatar" (click)="avatarInput.click()">
+            <img *ngIf="avatarPreview || currentUser?.avatarUrl" [src]="avatarPreview || currentUser?.avatarUrl" />
+            <span *ngIf="!avatarPreview && !currentUser?.avatarUrl">{{ getInitials(currentUser?.displayName || '') }}</span>
+            <div class="avatar-overlay">📷</div>
+          </div>
+          <div>
+            <div style="font-size:1.2rem;font-weight:700">{{ currentUser?.displayName }}</div>
+            <div style="color:var(--text-muted);font-size:0.875rem">@{{ currentUser?.userName }}</div>
+            <div style="color:var(--online-color);font-size:0.78rem;margin-top:4px">● Online</div>
+          </div>
+        </div>
+
+        <!-- Edit profile section -->
+        <div class="section">
+          <div class="section-title">✏️ Edit Profile</div>
+          <div style="display:flex;flex-direction:column;gap:14px">
+            <div class="form-group">
+              <label class="form-label">Display Name</label>
+              <input class="input-field" [(ngModel)]="form.displayName" placeholder="Your display name" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Bio</label>
+              <textarea class="input-field" [(ngModel)]="form.bio" rows="3" placeholder="Tell people about yourself..."></textarea>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Avatar URL</label>
+              <input class="input-field" [(ngModel)]="form.avatarUrl" placeholder="https://..." />
+            </div>
+            <div *ngIf="profileMsg" class="alert" [class]="profileMsg.type === 'success' ? 'alert-success' : 'alert-error'">{{ profileMsg.text }}</div>
+            <button class="btn btn-primary" (click)="saveProfile()" [disabled]="saving" style="align-self:flex-start">
+              <span *ngIf="saving" class="spinner" style="width:14px;height:14px;border-width:2px"></span>
+              {{ saving ? 'Saving...' : '💾 Save Changes' }}
+            </button>
+          </div>
+        </div>
+
+        <!-- Change Password -->
+        <div class="section">
+          <div class="section-title">🔐 Change Password</div>
+          <div style="display:flex;flex-direction:column;gap:14px">
+            <div class="form-group">
+              <label class="form-label">Current Password</label>
+              <input class="input-field" type="password" [(ngModel)]="pwForm.old" placeholder="Current password" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">New Password</label>
+              <input class="input-field" type="password" [(ngModel)]="pwForm.new" placeholder="Min 8 characters" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Confirm New Password</label>
+              <input class="input-field" type="password" [(ngModel)]="pwForm.confirm" placeholder="Repeat new password" />
+            </div>
+            <div *ngIf="pwMsg" class="alert" [class]="pwMsg.type === 'success' ? 'alert-success' : 'alert-error'">{{ pwMsg.text }}</div>
+            <button class="btn btn-ghost" (click)="changePassword()" [disabled]="changingPw" style="align-self:flex-start">
+              {{ changingPw ? 'Changing...' : '🔑 Change Password' }}
+            </button>
+          </div>
+        </div>
+
+        <!-- Account info -->
+        <div class="section">
+          <div class="section-title">ℹ️ Account Info</div>
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border-color)">
+              <span class="text-muted text-sm">Email</span>
+              <span style="font-size:0.875rem">{{ currentUser?.email }}</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border-color)">
+              <span class="text-muted text-sm">Username</span>
+              <span style="font-size:0.875rem">@{{ currentUser?.userName }}</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;padding:10px 0">
+              <span class="text-muted text-sm">Role</span>
+              <span class="role-chip" [class]="'role-' + (currentUser?.role || 'member').toLowerCase()">{{ currentUser?.role || 'Member' }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>

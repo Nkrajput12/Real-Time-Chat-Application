@@ -1,0 +1,72 @@
+version: '3.4'
+
+services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+
+  redis:
+    image: redis:latest
+    ports:
+      - "6379:6379"
+
+  apigateway:
+    image: ${DOCKER_REGISTRY-}apigateway
+    build:
+      context: ./ApiGateway
+      dockerfile: Dockerfile
+    ports:
+      - "5000:80"
+    depends_on:
+      - rabbitmq
+
+  auth-service:
+    image: ${DOCKER_REGISTRY-}authservice
+    build:
+      context: ./services/ConnectHub.Authentication
+      dockerfile: Dockerfile
+    depends_on:
+      - rabbitmq
+
+  messaging-service:
+    image: ${DOCKER_REGISTRY-}messagingservice
+    build:
+      context: ./services/ConnectHub.Messaging
+      dockerfile: Dockerfile
+    depends_on:
+      - rabbitmq
+
+  room-service:
+    image: ${DOCKER_REGISTRY-}roomservice
+    build:
+      context: ./services/ConnectHub.ChatRoom-Servic
+      dockerfile: Dockerfile
+    depends_on:
+      - rabbitmq
+
+  presence-service:
+    image: ${DOCKER_REGISTRY-}presenceservice
+    build:
+      context: ./services/ConnectHub.Presence-Service
+      dockerfile: Dockerfile
+    depends_on:
+      - rabbitmq
+      - redis
+
+  notification-service:
+    image: ${DOCKER_REGISTRY-}notificationservice
+    build:
+      context: ./services/ConnectHub.Notification-Service
+      dockerfile: Dockerfile
+    depends_on:
+      - rabbitmq
+
+  media-api:
+    image: ${DOCKER_REGISTRY-}mediaapi
+    build:
+      context: ./services/ConnectHub.Media.API
+      dockerfile: Dockerfile
+    depends_on:
+      - rabbitmq

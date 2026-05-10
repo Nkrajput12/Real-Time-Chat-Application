@@ -1,0 +1,87 @@
+<div class="browse-page">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Discover <span>Rooms</span></div>
+          <div class="text-muted text-sm">Find communities that interest you</div>
+        </div>
+        <button class="btn btn-primary" (click)="showCreate = true">➕ Create Room</button>
+      </div>
+
+      <!-- Search & filters -->
+      <div class="filters">
+        <div style="position:relative;flex:1;max-width:360px">
+          <input class="input-field" [(ngModel)]="searchQuery" (input)="applyFilter()" placeholder="🔍  Search rooms..." style="padding-left:36px" />
+        </div>
+        <button class="filter-chip" [class.active]="filter === 'all'" (click)="setFilter('all')">All</button>
+        <button class="filter-chip" [class.active]="filter === 'public'" (click)="setFilter('public')">🌐 Public</button>
+        <button class="filter-chip" [class.active]="filter === 'joined'" (click)="setFilter('joined')">✅ Joined</button>
+      </div>
+
+      <!-- Loading -->
+      <div *ngIf="loading" style="display:flex;justify-content:center;padding:60px"><div class="spinner" style="width:36px;height:36px"></div></div>
+
+      <!-- Room grid -->
+      <div *ngIf="!loading" class="rooms-grid">
+        <div *ngIf="filtered.length === 0" class="empty-grid">
+          <div style="font-size:3rem;margin-bottom:12px">🔍</div>
+          <div>No rooms found matching your search</div>
+        </div>
+        <div *ngFor="let room of filtered" class="room-card" (click)="openRoom(room)">
+          <div class="room-avatar">
+            <img *ngIf="room.avatarUrl" [src]="room.avatarUrl" style="width:100%;height:100%;object-fit:cover;border-radius:12px" />
+            <span *ngIf="!room.avatarUrl">{{ room.roomType === 'PUBLIC' ? '🌐' : '🔒' }}</span>
+          </div>
+          <div class="room-name">{{ room.roomName }}</div>
+          <div class="room-desc">{{ room.description || 'No description provided.' }}</div>
+          <div class="room-footer">
+            <div class="room-meta">
+              <span>👥 {{ room.memberCount || 0 }}</span>
+              <span class="badge" [style.background]="room.roomType === 'PUBLIC' ? 'rgba(34,197,94,0.15)' : 'rgba(255,255,255,0.05)'" [style.color]="room.roomType === 'PUBLIC' ? 'var(--online-color)' : 'var(--text-muted)'" style="border:1px solid currentColor;padding:2px 8px;border-radius:99px;font-size:0.65rem;font-weight:700">
+                {{ room.roomType }}
+              </span>
+            </div>
+            <button class="join-btn" [class.joined]="isJoined(room.roomId)" (click)="joinRoom($event, room)">
+              {{ isJoined(room.roomId) ? '✓ Joined' : 'Join' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Create Room Modal -->
+    <div *ngIf="showCreate" class="modal-overlay" (click)="showCreate = false">
+      <div class="modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <div class="modal-title">Create Room</div>
+          <button class="btn-icon" (click)="showCreate = false">✕</button>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:14px">
+          <div class="form-group">
+            <label class="form-label">Room Name *</label>
+            <input class="input-field" [(ngModel)]="newRoom.roomName" placeholder="e.g. Design Discuss" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Description</label>
+            <textarea class="input-field" [(ngModel)]="newRoom.description" rows="3" placeholder="What's this room about?"></textarea>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Type</label>
+            <select class="input-field" [(ngModel)]="newRoom.roomType">
+              <option value="PUBLIC">🌐 Public</option>
+              <option value="PRIVATE">🔒 Private</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Max Members (2–500)</label>
+            <input class="input-field" type="number" [(ngModel)]="newRoom.maxMembers" min="2" max="500" />
+          </div>
+          <div *ngIf="createError" class="alert alert-error">{{ createError }}</div>
+          <div style="display:flex;gap:10px;justify-content:flex-end">
+            <button class="btn btn-ghost" (click)="showCreate = false">Cancel</button>
+            <button class="btn btn-primary" (click)="createRoom()" [disabled]="creating">
+              {{ creating ? '...' : '🚀 Create' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>

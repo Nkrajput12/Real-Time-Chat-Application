@@ -1,0 +1,156 @@
+<div class="room-container">
+      <div class="room-main">
+        <!-- Header -->
+        <div class="chat-header">
+          <div class="room-icon">{{ room?.roomType === 'PUBLIC' ? '🌐' : '🔒' }}</div>
+          <div style="flex:1">
+            <div style="font-weight:700;font-size:0.95rem">{{ room?.roomName }}</div>
+            <div style="font-size:0.75rem;color:var(--text-muted)">{{ members.length }} members</div>
+          </div>
+          <button class="btn-icon" (click)="showMembers = !showMembers" title="Members" [class.active]="showMembers">👥</button>
+          <button *ngIf="isRoomAdmin" class="btn-icon" (click)="showSettings = true" title="Room Settings">⚙️</button>
+        </div>
+
+        <!-- Messages -->
+        <div class="messages-area" #msgContainer>
+          <div *ngIf="loading" style="display:flex;align-items:center;justify-content:center;padding:40px"><div class="spinner"></div></div>
+          <div *ngIf="!loading && messages.length === 0" class="empty-state" style="padding:60px 0">
+            <div style="font-size:3rem">💬</div>
+            <p class="text-muted">Be the first to say something in <strong>{{ room?.roomName }}</strong>!</p>
+          </div>
+
+          <ng-container *ngFor="let msg of messages; let i = index">
+            <div *ngIf="showDateDivider(i)" class="date-sep">{{ formatDate(msg.sentAt) }}</div>
+            <div class="msg-row" [class.mine]="msg.senderId === currentUser?.userId">
+              <div *ngIf="msg.senderId !== currentUser?.userId" class="sender-avatar" (click)="viewUser(msg.senderId)" style="cursor:pointer">{{ getInitials(getSenderName(msg.senderId)) }}</div>
+              <div class="msg-content">
+                <div *ngIf="msg.senderId !== currentUser?.userId" class="sender-name" (click)="viewUser(msg.senderId)" style="cursor:pointer">{{ getSenderName(msg.senderId) }}</div>
+                <div class="msg-text" [class.incoming]="msg.senderId !== currentUser?.userId" [class.outgoing]="msg.senderId === currentUser?.userId" [class.deleted]="msg.isDeleted">
+                  <span *ngIf="msg.mediaUrl && msg.messageType === 'IMAGE'" style="display:block;margin-bottom:6px">
+                    <img [src]="msg.mediaUrl" style="max-width:220px;border-radius:8px" />
+                  </span>
+                  <span [innerHTML]="renderContent(msg.content, msg.isDeleted)"></span>
+                  <span *ngIf="msg.isEdited" style="font-size:0.65rem;opacity:0.6;margin-left:4px">(edited)</span>
+                  
+                  <!-- Message Actions (Delete) -->
+                  <div class="msg-actions" *ngIf="!msg.isDeleted && (msg.senderId === currentUser?.userId || isRoomAdmin)">
+                    <button class="btn-delete" (click)="deleteMessage(msg)" title="Delete Message">🗑️</button>
+                  </div>
+                </div>
+                <div class="msg-time">{{ formatTime(msg.sentAt) }}</div>
+              </div>
+            </div>
+          </ng-container>
+
+          <!-- Typing -->
+          <div *ngIf="typingUsers.size > 0" class="typing-row">
+            <div class="sender-avatar" style="font-size:0.6rem">...</div>
+            <div style="background:var(--bg-card);border:1px solid var(--border-color);border-radius:12px;padding:8px 14px">
+              <div class="typing-indicator">
+                <div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>
+              </div>
+            </div>
+            <span style="font-size:0.72rem;color:var(--text-muted)">{{ getTypingText() }}</span>
+          </div>
+        </div>
+
+        <!-- Input -->
+        <div class="input-area">
+          <input type="file" #fileInput (change)="onFileSelected($event)" style="display:none" />
+          <button class="btn-icon" (click)="fileInput.click()" title="Attach">📎</button>
+          <textarea class="msg-input" [(ngModel)]="messageText" (keydown)="onKeyDown($event)" (input)="onInputChange()" [placeholder]="'Message #' + (room?.roomName || 'room') + '...'" rows="1"></textarea>
+          <button class="send-btn" (click)="sendMessage()" [disabled]="!messageText.trim() || sending">
+            <span *ngIf="!sending">➤</span>
+            <span *ngIf="sending" class="spinner" style="width:14px;height:14px;border-width:2px"></span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Members panel -->
+      <div class="members-panel" *ngIf="showMembers">
+        <div class="members-header">
+          <span>Members ({{ members.length }})</span>
+          <button class="btn-icon btn-sm" *ngIf="isRoomAdmin" (click)="showAddMember = true" title="Add member">➕</button>
+        </div>
+        <div class="members-list">
+          <div *ngFor="let m of members" class="member-item">
+            <div class="member-av" (click)="viewUser(m.userId)" style="cursor:pointer">
+              <img *ngIf="m.avatarUrl" [src]="m.avatarUrl" style="width:100%;height:100%;object-fit:cover;border-radius:50%" />
+              <span *ngIf="!m.avatarUrl">{{ getInitials(m.displayName || m.userName || '') }}</span>
+              <div class="online-badge" [class.offline]="!onlineSet.has(m.userId)"></div>
+            </div>
+            <div style="flex:1;min-width:0">
+              <div class="member-name" (click)="viewUser(m.userId)" style="cursor:pointer">{{ m.displayName || m.userName || ('User ' + m.userId) }}</div>
+              
+              <!-- Role selector for admins -->
+              <div *ngIf="isRoomAdmin && m.userId !== currentUser?.userId; else roleBadge" class="role-selector">
+                <select [ngModel]="m.role" (ngModelChange)="updateRole(m, $event)" class="role-select">
+                  <option value="ADMIN">ADMIN</option>
+                  <option value="MODERATOR">MODERATOR</option>
+                  <option value="MEMBER">MEMBER</option>
+                </select>
+              </div>
+              <ng-template #roleBadge>
+                <span class="role-chip" [class]="'role-' + m.role.toLowerCase()">{{ m.role }}</span>
+              </ng-template>
+            </div>
+            <button *ngIf="isRoomAdmin && m.userId !== currentUser?.userId" class="btn-icon btn-sm" (click)="removeMember(m)" title="Remove">✕</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Add Member Modal -->
+    <div *ngIf="showAddMember" class="modal-overlay" (click)="showAddMember = false">
+      <div class="modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <div class="modal-title">Add Member</div>
+          <button class="btn-icon" (click)="showAddMember = false">✕</button>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Search User</label>
+          <input class="input-field" [(ngModel)]="addMemberQuery" (input)="searchAddUser()" placeholder="Username or display name" />
+        </div>
+        <div style="margin-top:12px;display:flex;flex-direction:column;gap:6px;max-height:200px;overflow-y:auto">
+          <div *ngFor="let u of addMemberResults" style="display:flex;align-items:center;gap:10px;padding:8px;border-radius:var(--radius-sm);cursor:pointer;transition:background var(--transition)" (click)="addMember(u.userId)" [style.background]="'var(--bg-card)'">
+            <div style="width:30px;height:30px;border-radius:50%;background:var(--accent-gradient);display:flex;align-items:center;justify-content:center;font-size:0.7rem;color:white;font-weight:700">{{ getInitials(u.displayName) }}</div>
+            <div>
+              <div style="font-weight:600;font-size:0.85rem">{{ u.displayName }}</div>
+              <div style="font-size:0.72rem;color:var(--text-muted)">@{{ u.userName }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Room Settings Modal -->
+    <div *ngIf="showSettings && room" class="modal-overlay" (click)="showSettings = false">
+      <div class="modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <div class="modal-title">Room Settings</div>
+          <button class="btn-icon" (click)="showSettings = false">✕</button>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:14px">
+          <div class="form-group">
+            <label class="form-label">Room Name</label>
+            <input class="input-field" [(ngModel)]="editRoom.roomName" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Description</label>
+            <input class="input-field" [(ngModel)]="editRoom.description" />
+          </div>
+          <div style="display:flex;gap:10px;justify-content:space-between">
+            <button class="btn btn-danger btn-sm" (click)="deleteRoom()">🗑️ Delete Room</button>
+            <button class="btn btn-primary btn-sm" (click)="saveSettings()">💾 Save</button>
+          </div>
+        </div>
+    </div>
+    
+    <!-- User Profile Modal -->
+    <app-user-profile-modal 
+      *ngIf="selectedUser" 
+      [user]="selectedUser" 
+      [isMe]="selectedUser.userId === currentUser?.userId"
+      (close)="selectedUser = null"
+      (message)="onMessageUser($event)">
+    </app-user-profile-modal>

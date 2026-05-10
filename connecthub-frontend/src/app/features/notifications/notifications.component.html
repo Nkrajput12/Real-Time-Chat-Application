@@ -1,0 +1,43 @@
+<div class="page">
+      <div class="page-header">
+        <div>
+          <h1 style="font-size:1.6rem;font-weight:800">Notifications</h1>
+          <div class="text-muted text-sm" style="margin-top:2px">
+            {{ unreadCount }} unread
+          </div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-ghost btn-sm" (click)="markAllRead()" [disabled]="unreadCount === 0">✓ Mark all read</button>
+        </div>
+      </div>
+
+      <!-- Tabs -->
+      <div class="tabs">
+        <button class="tab" [class.active]="tab === 'all'" (click)="setTab('all')">All</button>
+        <button class="tab" [class.active]="tab === 'unread'" (click)="setTab('unread')">Unread</button>
+        <button class="tab" [class.active]="tab === 'messages'" (click)="setTab('messages')">Messages</button>
+        <button class="tab" [class.active]="tab === 'mentions'" (click)="setTab('mentions')">Mentions</button>
+      </div>
+
+      <!-- Loading -->
+      <div *ngIf="loading" style="display:flex;justify-content:center;padding:40px"><div class="spinner" style="width:32px;height:32px"></div></div>
+
+      <!-- Notifications -->
+      <div *ngIf="!loading" class="notif-list">
+        <div *ngIf="filtered.length === 0" class="empty-state">
+          <div class="empty-state-icon">🔔</div>
+          <h3>All caught up!</h3>
+          <p>No notifications to show here.</p>
+        </div>
+
+        <div *ngFor="let n of filtered" class="notif-item" [class.unread]="!n.isRead" (click)="handleClick(n)">
+          <div class="notif-icon" [style.background]="getIconBg(n.type)">{{ getIcon(n.type) }}</div>
+          <div class="notif-body">
+            <div class="notif-title">{{ n.title }}</div>
+            <div class="notif-msg">{{ n.message }}</div>
+            <div style="margin-top:6px;font-size:0.7rem;color:var(--text-muted)">{{ formatTime(n.sentAt) }}</div>
+          </div>
+          <div *ngIf="!n.isRead" class="unread-dot"></div>
+        </div>
+      </div>
+    </div>
