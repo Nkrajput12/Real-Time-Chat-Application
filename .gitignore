@@ -1,0 +1,17 @@
+# .NET Core
+[Bb]in/
+[Oo]bj/
+*.user
+*.userosscache
+*.sln.docuser
+.vs/
+.vscode/
+appsettings.json
+appsettings.Development.json
+appsettings.Production.json
+.gemini/
+.env
+debug.log
+node_modules/
+dist/
+.angular/

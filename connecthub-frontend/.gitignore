@@ -3,6 +3,17 @@ node_modules/
 dist/
 .angular/
 
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+# Environment settings (both tracked - environment.ts needed for build)
+# environment.prod.ts is used at build time via fileReplacements in angular.json
+=======
+# Environment settings (keep prod, ignore local)
+src/environments/environment.ts
+!src/environments/environment.prod.ts
+>>>>>>> cb75e879dcdb3101003eba2754aeab79ff3c60f4
+>>>>>>> f999b3cf7b1fa5f8215c4e4f4b64f6d72dece6e4
 
 # OS specific
 .DS_Store
