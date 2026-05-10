@@ -1,0 +1,188 @@
+<div style="display:flex;flex-direction:column;height:100vh">
+    <!-- Connection status bar -->
+    <div *ngIf="connState !== 'connected'" style="text-align:center;padding:5px 16px;font-size:0.8rem;font-weight:600;flex-shrink:0" [style.background]="connState === 'connecting' ? 'rgba(245,158,11,0.9)' : 'rgba(239,68,68,0.9)'" [style.color]="connState === 'connecting' ? '#000' : '#fff'">
+      {{ connState === 'connecting' ? '🔄 Connecting to real-time server...' : '❌ Disconnected — messages may not deliver in real time' }}
+    </div>
+    <div class="layout" style="flex:1;overflow:hidden">
+      <!-- Sidebar -->
+      <aside class="sidebar">
+        <!-- Header -->
+        <div class="sidebar-header">
+          <div class="logo">
+            <div class="logo-icon">💬</div>
+            <div class="logo-text">Connect<span>Hub</span></div>
+          </div>
+          <button class="btn-icon" (click)="showCreateRoom = true" data-tooltip="New Room" title="Create Room">➕</button>
+        </div>
+
+        <!-- Search -->
+        <div class="search-box">
+          <div class="search-input-wrap" style="position:relative">
+            <span class="search-icon">🔍</span>
+            <input class="input-field" [(ngModel)]="searchQuery" (input)="onSearch()" placeholder="Search users or rooms..." />
+            <button *ngIf="searchQuery" class="btn-icon" (click)="clearSearch()" style="position:absolute;right:4px;top:50%;transform:translateY(-50%);font-size:0.8rem">✕</button>
+            <!-- Search results dropdown -->
+            <div *ngIf="searchResults.length > 0" class="search-results">
+              <div *ngFor="let u of searchResults" class="search-result-item" (click)="openDM(u.userId)">
+                <div class="chat-avatar" style="font-size:0.8rem">{{ getInitials(u.displayName || u.userName) }}</div>
+                <div>
+                  <div style="font-weight:600;font-size:0.875rem">{{ u.displayName }}</div>
+                  <div style="font-size:0.75rem;color:var(--text-muted)">@{{ u.userName }}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="chat-list">
+          <!-- DMs section -->
+          <div class="section-label">Direct Messages</div>
+          <div *ngIf="recentChats.length === 0" style="padding:8px 14px;color:var(--text-muted);font-size:0.8rem">No conversations yet</div>
+          <div
+            *ngFor="let chat of recentChats"
+            class="chat-item"
+            [class.active]="activeRoute === '/chat/dm/' + chat.userId"
+            (click)="openDM(chat.userId)"
+          >
+            <div class="chat-avatar">
+              <img *ngIf="chat.avatarUrl" [src]="chat.avatarUrl" [alt]="chat.displayName" />
+              <span *ngIf="!chat.avatarUrl">{{ getInitials(chat.displayName) }}</span>
+              <div class="online-dot" [class.offline]="!isOnline(chat.userId)"></div>
+            </div>
+            <div class="chat-meta">
+              <div class="chat-name">{{ chat.displayName }}</div>
+              <div class="chat-preview">{{ chat.lastMessage || 'Say hi 👋' }}</div>
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
+              <div class="chat-time">{{ formatTime(chat.lastMessageAt) }}</div>
+              <div *ngIf="chat.unreadCount > 0" class="unread-badge">{{ chat.unreadCount }}</div>
+            </div>
+          </div>
+
+          <!-- Rooms section -->
+          <div class="section-label" style="margin-top:8px">Rooms</div>
+          <div *ngIf="myRooms.length === 0" style="padding:8px 14px;color:var(--text-muted);font-size:0.8rem">No rooms yet</div>
+          <div
+            *ngFor="let room of myRooms"
+            class="chat-item"
+            [class.active]="activeRoute === '/chat/room/' + room.roomId"
+            (click)="openRoom(room.roomId)"
+          >
+            <div class="chat-room-icon">
+              <img *ngIf="room.avatarUrl" [src]="room.avatarUrl" [alt]="room.roomName" style="width:100%;height:100%;object-fit:cover;border-radius:8px" />
+              <span *ngIf="!room.avatarUrl">{{ room.roomType === 'PUBLIC' ? '🌐' : '🔒' }}</span>
+            </div>
+            <div class="chat-meta">
+              <div class="chat-name">{{ room.roomName }}</div>
+              <div class="chat-preview">{{ room.roomType | lowercase }} room</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bottom navigation -->
+        <div class="sidebar-nav">
+          <button class="nav-btn" [class.active]="activeRoute.startsWith('/chat')" routerLink="/chat" title="Chat">
+            <span class="icon">💬</span>
+            <span>Chat</span>
+          </button>
+          <button class="nav-btn" [class.active]="activeRoute.startsWith('/rooms')" routerLink="/rooms" title="Browse Rooms">
+            <span class="icon">🌐</span>
+            <span>Rooms</span>
+          </button>
+          <div class="nav-btn-rel">
+            <button class="nav-btn" [class.active]="activeRoute.startsWith('/notifications')" routerLink="/notifications" title="Notifications">
+              <span class="icon">🔔</span>
+              <span>Alerts</span>
+            </button>
+            <span *ngIf="(unreadNotifs$ | async)! > 0" class="badge-count">{{ unreadNotifs$ | async }}</span>
+          </div>
+          <button class="nav-btn" [class.active]="activeRoute.startsWith('/profile')" routerLink="/profile" title="Profile">
+            <span class="icon">👤</span>
+            <span>Profile</span>
+          </button>
+          <button *ngIf="isAdmin" class="nav-btn" [class.active]="activeRoute.startsWith('/admin')" routerLink="/admin" title="Admin">
+            <span class="icon">⚙️</span>
+            <span>Admin</span>
+          </button>
+        </div>
+
+        <!-- User footer -->
+        <div class="user-footer">
+          <div class="avatar avatar-sm" style="flex-shrink:0">
+            <img *ngIf="currentUser?.avatarUrl" [src]="currentUser?.avatarUrl" style="width:100%;height:100%;border-radius:50%;object-fit:cover" />
+            <span *ngIf="!currentUser?.avatarUrl">{{ getInitials(currentUser?.displayName || '') }}</span>
+          </div>
+          <div class="user-info">
+            <div class="user-name">{{ currentUser?.displayName }}</div>
+            <div class="user-status"><span class="status-dot"></span> Online</div>
+          </div>
+          <button class="btn-icon" (click)="themeService.toggleTheme()" title="Toggle Theme">
+            {{ (themeService.isDarkMode$ | async) ? '☀️' : '🌙' }}
+          </button>
+          <button class="btn-icon" (click)="logout()" title="Logout" data-tooltip="Sign out">🚪</button>
+        </div>
+      </aside>
+
+      <!-- Main content area -->
+      <main class="main-content">
+        <router-outlet></router-outlet>
+      </main>
+    </div>
+    </div>
+
+    <!-- Create Room Modal -->
+    <div *ngIf="showCreateRoom" class="modal-overlay" (click)="showCreateRoom = false">
+      <div class="modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <div class="modal-title">Create New Room</div>
+          <button class="btn-icon" (click)="showCreateRoom = false">✕</button>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:14px">
+          <div class="form-group">
+            <label class="form-label">Room Name</label>
+            <input class="input-field" [(ngModel)]="newRoom.roomName" placeholder="e.g. General, Design, Dev" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Description</label>
+            <input class="input-field" [(ngModel)]="newRoom.description" placeholder="What's this room about?" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Type</label>
+            <select class="input-field" [(ngModel)]="newRoom.roomType">
+              <option value="PUBLIC">🌐 Public — anyone can join</option>
+              <option value="PRIVATE">🔒 Private — invite only</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Max Members</label>
+            <input class="input-field" type="number" [(ngModel)]="newRoom.maxMembers" min="2" max="500" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Add Members</label>
+            <div style="position:relative">
+              <input class="input-field" [(ngModel)]="memberSearchQuery" (input)="onMemberSearch()" placeholder="Search users to invite..." />
+              <div *ngIf="memberSearchResults.length > 0" class="search-results" style="bottom:unset;top:100%;max-height:150px">
+                <div *ngFor="let u of memberSearchResults" class="search-result-item" (click)="toggleUserSelection(u)">
+                  <div class="chat-avatar" style="width:24px;height:24px;font-size:0.6rem">{{ getInitials(u.displayName) }}</div>
+                  <div style="font-size:0.8rem">{{ u.displayName }} (@{{ u.userName }})</div>
+                  <div *ngIf="isUserSelected(u.userId)" style="margin-left:auto;color:var(--success-color)">✓</div>
+                </div>
+              </div>
+            </div>
+            <div *ngIf="selectedMembers.size > 0" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:10px">
+              <div *ngFor="let m of getSelectedMembersList()" class="badge" style="display:flex;align-items:center;gap:6px;padding:4px 10px;background:var(--accent-glow);border:1px solid var(--accent-primary);border-radius:14px;font-size:0.75rem">
+                {{ m.displayName }}
+                <span (click)="toggleUserSelection(m)" style="cursor:pointer;opacity:0.6">✕</span>
+              </div>
+            </div>
+          </div>
+          <div *ngIf="createRoomError" class="alert alert-error">{{ createRoomError }}</div>
+          <div style="display:flex;gap:10px;justify-content:flex-end">
+            <button class="btn btn-ghost" (click)="showCreateRoom = false">Cancel</button>
+            <button class="btn btn-primary" (click)="createRoom()" [disabled]="creatingRoom">
+              {{ creatingRoom ? '...' : '🚀 Create Room' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>

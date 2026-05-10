@@ -1,0 +1,44 @@
+<div class="modal-overlay" (click)="close.emit()">
+      <div class="profile-card" (click)="$event.stopPropagation()">
+        <div class="profile-header">
+          <button class="close-btn" (click)="close.emit()">✕</button>
+          <div class="avatar-wrap">
+            <img *ngIf="user.avatarUrl" [src]="user.avatarUrl" [alt]="user.displayName" />
+            <div *ngIf="!user.avatarUrl" class="avatar-initials">{{ getInitials(user.displayName) }}</div>
+          </div>
+        </div>
+        
+        <div class="profile-body">
+          <div class="name-section">
+            <div class="display-name">{{ user.displayName }}</div>
+            <div class="username">@{{ user.userName }}</div>
+          </div>
+
+          <div class="bio-section">
+            <div class="bio-label">About Me</div>
+            <div *ngIf="user.bio" class="bio-text">{{ user.bio }}</div>
+            <div *ngIf="!user.bio" class="bio-text bio-empty">No bio provided yet.</div>
+          </div>
+
+          <div class="info-grid">
+            <div class="info-item">
+              <span class="info-label">Member Since</span>
+              <span class="info-value">{{ formatDate(user.createdAt) }}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Status</span>
+              <div class="status-badge" [style.color]="user.isOnline ? 'var(--online-color)' : 'var(--text-muted)'">
+                <span class="status-dot" [class.offline]="!user.isOnline"></span>
+                {{ user.isOnline ? 'Online' : 'Offline' }}
+              </div>
+            </div>
+          </div>
+
+          <div class="action-row" *ngIf="!isMe">
+            <button class="action-btn btn-message" (click)="onMessage()">
+              <span>💬</span> Send Message
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>

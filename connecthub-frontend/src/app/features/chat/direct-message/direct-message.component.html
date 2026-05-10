@@ -1,0 +1,148 @@
+<div class="dm-container" *ngIf="recipient">
+      <!-- Header -->
+      <div class="chat-header">
+        <div class="header-avatar" (click)="viewUser(recipient.userId)" style="cursor:pointer">
+          <img *ngIf="recipient.avatarUrl" [src]="recipient.avatarUrl" style="width:100%;height:100%;object-fit:cover;border-radius:50%" />
+          <span *ngIf="!recipient.avatarUrl">{{ getInitials(recipient.displayName) }}</span>
+          <div class="online-badge" [class.offline]="!recipientOnline"></div>
+        </div>
+        <div style="flex:1">
+          <div class="header-title" (click)="viewUser(recipient.userId)" style="cursor:pointer">{{ recipient.displayName }}</div>
+          <div class="header-subtitle" [class.header-online]="recipientOnline">
+            {{ recipientOnline ? '● Online' : 'Offline' }}
+          </div>
+        </div>
+        <div style="display:flex;gap:6px">
+          <button class="btn-icon" (click)="searchMode = !searchMode" title="Search messages">🔍</button>
+          <button class="btn-icon" title="More options">⋯</button>
+        </div>
+      </div>
+
+      <!-- Search bar -->
+      <div *ngIf="searchMode" style="padding:8px 16px;background:var(--bg-tertiary);border-bottom:1px solid var(--border-color)">
+        <div style="position:relative">
+          <input class="input-field" [(ngModel)]="searchTerm" (input)="searchMessages()" placeholder="Search in this conversation..." style="padding-left:32px;font-size:0.85rem" />
+          <span style="position:absolute;left:10px;top:50%;transform:translateY(-50%)">🔍</span>
+        </div>
+      </div>
+
+      <!-- Messages -->
+      <div class="messages-area" #msgContainer>
+        <div *ngIf="loading" style="display:flex;align-items:center;justify-content:center;padding:40px">
+          <div class="spinner"></div>
+        </div>
+
+        <div *ngIf="!loading && messages.length === 0" class="empty-state" style="padding:60px 0">
+          <div style="font-size:3rem">👋</div>
+          <p class="text-muted">Say hi to <strong>{{ recipient.displayName }}</strong>!</p>
+        </div>
+
+        <ng-container *ngFor="let msg of filteredMessages; let i = index">
+          <!-- Date divider -->
+          <div *ngIf="showDateDivider(i)" class="date-divider">{{ formatDate(msg.sentAt) }}</div>
+
+          <div class="msg-row" [class.outgoing]="msg.senderId === currentUser?.userId" [class.incoming]="msg.senderId !== currentUser?.userId">
+            <div *ngIf="msg.senderId !== currentUser?.userId" class="msg-sender-avatar" (click)="viewUser(msg.senderId)" style="cursor:pointer">
+              {{ getInitials(recipient.displayName) }}
+            </div>
+            <div class="msg-content">
+              <div class="msg-text" [class.incoming]="msg.senderId !== currentUser?.userId" [class.outgoing]="msg.senderId === currentUser?.userId" [class.deleted]="msg.isDeleted">
+                <!-- Message actions -->
+                <div *ngIf="!msg.isDeleted" class="msg-actions">
+                  <button *ngIf="msg.senderId === currentUser?.userId" class="msg-action-btn" (click)="startEdit(msg)" title="Edit">✏️</button>
+                  <button *ngIf="msg.senderId === currentUser?.userId" class="msg-action-btn" (click)="deleteMsg(msg)" title="Delete">🗑️</button>
+                </div>
+                <!-- Media -->
+                <div *ngIf="msg.mediaUrl && msg.messageType === 'IMAGE'" style="margin-bottom:6px">
+                  <img [src]="msg.mediaUrl" style="max-width:240px;border-radius:8px;cursor:pointer" (click)="openMedia(msg.mediaUrl!)" />
+                </div>
+                <div *ngIf="msg.mediaUrl && msg.messageType === 'FILE'" style="display:flex;align-items:center;gap:8px;padding:4px 0">
+                  <span>📎</span>
+                  <a [href]="msg.mediaUrl" target="_blank" style="color:inherit;text-decoration:underline;font-size:0.8rem">Download File</a>
+                </div>
+                <!-- Content -->
+                <span [innerHTML]="renderContent(msg.content, msg.isDeleted)"></span>
+                <span *ngIf="msg.isEdited" style="font-size:0.65rem;opacity:0.6;margin-left:4px">(edited)</span>
+              </div>
+              <div class="msg-status" [class.read]="msg.isRead">
+                {{ formatTime(msg.sentAt) }}
+                <span *ngIf="msg.senderId === currentUser?.userId"> · {{ msg.isRead ? '✓✓' : '✓' }}</span>
+              </div>
+            </div>
+          </div>
+        </ng-container>
+
+        <!-- Typing indicator -->
+        <div *ngIf="isTyping" class="typing-row">
+          <div class="msg-sender-avatar" style="font-size:0.65rem">{{ getInitials(recipient.displayName) }}</div>
+          <div style="background:var(--bg-card);border:1px solid var(--border-color);border-radius:12px;border-bottom-left-radius:4px;padding:8px 14px">
+            <div class="typing-indicator">
+              <div class="typing-dot"></div>
+              <div class="typing-dot"></div>
+              <div class="typing-dot"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Edit banner -->
+      <div *ngIf="editingMsg" class="edit-banner">
+        <span>✏️ Editing message</span>
+        <span style="flex:1;color:var(--text-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ editingMsg.content }}</span>
+        <button class="btn-icon" (click)="cancelEdit()">✕</button>
+      </div>
+
+      <!-- Media preview -->
+      <div *ngIf="selectedFile" class="media-preview">
+        <div class="media-preview-item">
+          <img *ngIf="filePreview" [src]="filePreview" />
+          <span *ngIf="!filePreview" style="font-size:1.5rem;display:flex;align-items:center;justify-content:center;height:100%">📎</span>
+          <button class="media-remove" (click)="removeFile()">✕</button>
+        </div>
+      </div>
+
+      <!-- Upload progress -->
+      <div *ngIf="uploading" class="upload-progress">
+        <div class="spinner" style="width:14px;height:14px;border-width:2px"></div>
+        Uploading file...
+      </div>
+
+      <!-- Input area -->
+      <div class="input-area">
+        <input type="file" #fileInput (change)="onFileSelected($event)" style="display:none" accept="image/*,.pdf,.doc,.docx,.txt,.mp3,.wav" />
+        <div class="input-wrap">
+          <textarea
+            class="msg-input"
+            [(ngModel)]="messageText"
+            (keydown)="onKeyDown($event)"
+            (input)="onInputChange()"
+            [placeholder]="editingMsg ? 'Edit your message...' : 'Message ' + recipient.displayName + '...'"
+            rows="1"
+          ></textarea>
+          <button class="btn-icon attach-btn" (click)="fileInput.click()" title="Attach file">📎</button>
+        </div>
+        <button class="send-btn" (click)="sendMessage()" [disabled]="(!messageText.trim() && !selectedFile) || sending" title="Send">
+          <span *ngIf="!sending">➤</span>
+          <span *ngIf="sending" class="spinner" style="width:14px;height:14px;border-width:2px"></span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Loading state -->
+    <div *ngIf="!recipient && !loading" class="empty-state h-full" style="background:var(--bg-primary)">
+      <div class="spinner"></div>
+    </div>
+
+    <!-- Light box -->
+    <div *ngIf="lightboxSrc" class="modal-overlay" (click)="lightboxSrc = null">
+      <img [src]="lightboxSrc" style="max-width:90vw;max-height:90vh;border-radius:var(--radius-md);box-shadow:var(--shadow-lg)" />
+    </div>
+
+    <!-- User Profile Modal -->
+    <app-user-profile-modal 
+      *ngIf="selectedUser" 
+      [user]="selectedUser" 
+      [isMe]="selectedUser.userId === currentUser?.userId"
+      (close)="selectedUser = null"
+      (message)="onMessageUser($event)">
+    </app-user-profile-modal>
