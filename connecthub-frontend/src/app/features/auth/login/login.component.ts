@@ -4,6 +4,7 @@ import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angula
 import { Router, RouterLink, ActivatedRoute } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 import { SignalRService } from '../../../core/services/signalr.service';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-login',
@@ -60,5 +61,9 @@ export class LoginComponent implements OnInit {
         this.error = err?.error?.message || 'Invalid credentials. Please try again.';
       }
     });
+  }
+
+  get googleAuthUrl(): string {
+    return `${environment.apiUrl}/auth/google-login`;
   }
 }

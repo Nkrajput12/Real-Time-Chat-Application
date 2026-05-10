@@ -1,53 +1,57 @@
 <div class="auth-bg">
-      <div class="auth-card">
-        <div class="auth-logo">
-          <div class="auth-logo-icon">💬</div>
-          <div class="auth-logo-text">Connect<span>Hub</span></div>
-        </div>
-
-        <h2 style="margin-bottom:6px">Welcome back</h2>
-        <p class="text-muted text-sm" style="margin-bottom:28px">Sign in to your account to continue</p>
-
-        <div *ngIf="error" class="alert alert-error animate-fade" style="margin-bottom:16px">
-          <span>⚠️</span> {{ error }}
-        </div>
-
-        <form [formGroup]="form" (ngSubmit)="onSubmit()" style="display:flex;flex-direction:column;gap:16px">
-          <div class="form-group">
-            <label class="form-label">Email or Username</label>
-            <input class="input-field" formControlName="emailOrUsername" placeholder="Enter your email or username" autocomplete="username" />
-            <span *ngIf="f['emailOrUsername'].touched && f['emailOrUsername'].errors?.['required']" class="form-error">Required</span>
-          </div>
-
-          <div class="form-group">
-            <label class="form-label">Password</label>
-            <div style="position:relative">
-              <input class="input-field" [type]="showPass ? 'text' : 'password'" formControlName="password" placeholder="Enter your password" autocomplete="current-password" style="padding-right:42px" />
-              <button type="button" class="btn-icon" (click)="showPass = !showPass" style="position:absolute;right:4px;top:50%;transform:translateY(-50%)">
-                {{ showPass ? '🙈' : '👁️' }}
-              </button>
-            </div>
-            <span *ngIf="f['password'].touched && f['password'].errors?.['required']" class="form-error">Required</span>
-          </div>
-
-          <button type="submit" class="btn btn-primary w-full" [disabled]="loading" style="margin-top:4px;padding:12px">
-            <span *ngIf="loading" class="spinner" style="width:16px;height:16px;border-width:2px"></span>
-            {{ loading ? 'Signing in...' : 'Sign In' }}
-          </button>
-        </form>
-
-        <div class="divider-label" style="margin:20px 0">
-          <span>or</span>
-        </div>
-
-        <div style="display:flex;flex-direction:column;gap:10px">
-          <a href="http://localhost:5000/auth/google-login" class="btn btn-ghost w-full" style="padding:11px">
-            <span>🔵</span> Continue with Google
-          </a>
-        </div>
-
-        <p class="text-muted text-sm" style="text-align:center;margin-top:24px">
-          Don't have an account? <a routerLink="/auth/register" class="text-accent">Create one</a>
-        </p>
-      </div>
+  <div class="auth-card">
+    <div class="auth-logo">
+      <div class="auth-logo-icon">💬</div>
+      <div class="auth-logo-text">Connect<span>Hub</span></div>
     </div>
+
+    <h2 style="margin-bottom:6px">Welcome back</h2>
+    <p class="text-muted text-sm" style="margin-bottom:28px">Sign in to your account to continue</p>
+
+    <div *ngIf="error" class="alert alert-error animate-fade" style="margin-bottom:16px">
+      <span>⚠️</span> {{ error }}
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" style="display:flex;flex-direction:column;gap:16px">
+      <div class="form-group">
+        <label class="form-label">Email or Username</label>
+        <input class="input-field" formControlName="emailOrUsername" placeholder="Enter your email or username"
+          autocomplete="username" />
+        <span *ngIf="f['emailOrUsername'].touched && f['emailOrUsername'].errors?.['required']"
+          class="form-error">Required</span>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <div style="position:relative">
+          <input class="input-field" [type]="showPass ? 'text' : 'password'" formControlName="password"
+            placeholder="Enter your password" autocomplete="current-password" style="padding-right:42px" />
+          <button type="button" class="btn-icon" (click)="showPass = !showPass"
+            style="position:absolute;right:4px;top:50%;transform:translateY(-50%)">
+            {{ showPass ? '🙈' : '👁️' }}
+          </button>
+        </div>
+        <span *ngIf="f['password'].touched && f['password'].errors?.['required']" class="form-error">Required</span>
+      </div>
+
+      <button type="submit" class="btn btn-primary w-full" [disabled]="loading" style="margin-top:4px;padding:12px">
+        <span *ngIf="loading" class="spinner" style="width:16px;height:16px;border-width:2px"></span>
+        {{ loading ? 'Signing in...' : 'Sign In' }}
+      </button>
+    </form>
+
+    <div class="divider-label" style="margin:20px 0">
+      <span>or</span>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <a [href]="googleAuthUrl" class="btn btn-ghost w-full" style="padding:11px">
+        <span>🔵</span> Continue with Google
+      </a>
+    </div>
+
+    <p class="text-muted text-sm" style="text-align:center;margin-top:24px">
+      Don't have an account? <a routerLink="/auth/register" class="text-accent">Create one</a>
+    </p>
+  </div>
+</div>
