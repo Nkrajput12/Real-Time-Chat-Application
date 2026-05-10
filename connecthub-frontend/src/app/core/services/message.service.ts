@@ -59,7 +59,7 @@ export class MessageService {
   }
 
   editMessage(id: number, content: string): Observable<any> {
-    return this.http.put(`${this.apiUrl}/edit/${id}`, JSON.stringify(content), {
+    return this.http.put(`${this.apiUrl}/${id}`, { content }, {
       headers: { 'Content-Type': 'application/json' }
     });
   }

@@ -1,4 +1,4 @@
-.dm-container { display: flex; flex-direction: column; height: 100vh; background: var(--bg-primary); }
+.dm-container { display: flex; flex-direction: column; height: 100%; background: var(--bg-primary); }
 
     .chat-header {
       display: flex; align-items: center; gap: 12px;

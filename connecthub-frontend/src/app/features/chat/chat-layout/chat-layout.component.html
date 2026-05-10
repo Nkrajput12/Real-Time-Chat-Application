@@ -1,4 +1,4 @@
-<div style="display:flex;flex-direction:column;height:100vh">
+<div style="display:flex;flex-direction:column;height:100dvh">
     <!-- Connection status bar -->
     <div *ngIf="connState !== 'connected'" style="text-align:center;padding:5px 16px;font-size:0.8rem;font-weight:600;flex-shrink:0" [style.background]="connState === 'connecting' ? 'rgba(245,158,11,0.9)' : 'rgba(239,68,68,0.9)'" [style.color]="connState === 'connecting' ? '#000' : '#fff'">
       {{ connState === 'connecting' ? '🔄 Connecting to real-time server...' : '❌ Disconnected — messages may not deliver in real time' }}
