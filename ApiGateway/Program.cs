@@ -106,6 +106,8 @@ app.UseSwaggerUI(c =>
 
 app.UseAuthorization();
 
+app.UseWebSockets();
+
 app.MapReverseProxy();
 
 app.Run();
