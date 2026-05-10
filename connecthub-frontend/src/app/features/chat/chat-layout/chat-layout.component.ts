@@ -9,6 +9,7 @@ import { MessageService } from '../../../core/services/message.service';
 import { RoomService } from '../../../core/services/room.service';
 import { NotificationService } from '../../../core/services/notification.service';
 import { ThemeService } from '../../../core/services/theme.service';
+import { UiStateService } from '../../../core/services/ui-state.service';
 import { AuthResponse, ChatRoom, RecentChat, SignalRMessage } from '../../../core/models';
 
 @Component({
@@ -48,7 +49,8 @@ export class ChatLayoutComponent implements OnInit, OnDestroy {
     private notifService: NotificationService,
     private router: Router,
     private cdr: ChangeDetectorRef,
-    public themeService: ThemeService
+    public themeService: ThemeService,
+    public uiState: UiStateService
   ) {
     this.unreadNotifs$ = this.notifService.unreadCount$;
   }
@@ -62,7 +64,16 @@ export class ChatLayoutComponent implements OnInit, OnDestroy {
     this.activeRoute = this.router.url;
     this.router.events.pipe(takeUntil(this.destroy$)).subscribe(() => {
       this.activeRoute = this.router.url;
+      // On mobile, hide sidebar when a specific chat is opened
+      if (window.innerWidth < 768 && (this.activeRoute.includes('/dm/') || this.activeRoute.includes('/room/'))) {
+        this.uiState.setSidebarVisible(false);
+      }
     });
+
+    // Initial check for mobile
+    if (window.innerWidth < 768 && (this.activeRoute.includes('/dm/') || this.activeRoute.includes('/room/'))) {
+      this.uiState.setSidebarVisible(false);
+    }
 
     // Load data
     this.loadRecentChats();
@@ -241,6 +252,10 @@ export class ChatLayoutComponent implements OnInit, OnDestroy {
 
   isUserSelected(userId: number): boolean { return this.selectedMembers.has(userId); }
   getSelectedMembersList(): any[] { return Array.from(this.selectedMembers.values()); }
+
+  toggleSidebar(): void {
+    this.uiState.toggleSidebar();
+  }
 
   logout(): void {
     this.signalR.stopConnection();

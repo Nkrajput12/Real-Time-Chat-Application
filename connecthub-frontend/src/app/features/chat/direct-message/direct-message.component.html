@@ -1,6 +1,7 @@
 <div class="dm-container" *ngIf="recipient">
       <!-- Header -->
       <div class="chat-header">
+        <button class="btn-icon mobile-menu-btn" (click)="toggleSidebar()" title="Toggle Menu">☰</button>
         <div class="header-avatar" (click)="viewUser(recipient.userId)" style="cursor:pointer">
           <img *ngIf="recipient.avatarUrl" [src]="recipient.avatarUrl" style="width:100%;height:100%;object-fit:cover;border-radius:50%" />
           <span *ngIf="!recipient.avatarUrl">{{ getInitials(recipient.displayName) }}</span>

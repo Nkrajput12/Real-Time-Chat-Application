@@ -14,6 +14,12 @@
     .header-title { font-weight: 700; font-size: 0.95rem; }
     .header-subtitle { font-size: 0.75rem; color: var(--text-muted); }
     .header-online { color: var(--online-color); }
+    
+    .mobile-menu-btn { display: none; }
+    
+    @media (max-width: 768px) {
+      .mobile-menu-btn { display: flex; margin-right: -4px; }
+    }
 
     .messages-area { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 4px; }
 

@@ -5,14 +5,17 @@
     </div>
     <div class="layout" style="flex:1;overflow:hidden">
       <!-- Sidebar -->
-      <aside class="sidebar">
+      <aside class="sidebar" [class.hidden]="(uiState.sidebarVisible$ | async) === false">
         <!-- Header -->
         <div class="sidebar-header">
           <div class="logo">
             <div class="logo-icon">💬</div>
             <div class="logo-text">Connect<span>Hub</span></div>
           </div>
-          <button class="btn-icon" (click)="showCreateRoom = true" data-tooltip="New Room" title="Create Room">➕</button>
+          <div style="display:flex;gap:4px">
+            <button class="btn-icon mobile-only" (click)="toggleSidebar()" title="Close Menu">✕</button>
+            <button class="btn-icon" (click)="showCreateRoom = true" data-tooltip="New Room" title="Create Room">➕</button>
+          </div>
         </div>
 
         <!-- Search -->

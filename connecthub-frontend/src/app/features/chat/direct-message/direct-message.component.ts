@@ -8,6 +8,7 @@ import { SignalRService } from '../../../core/services/signalr.service';
 import { MessageService } from '../../../core/services/message.service';
 import { MediaService } from '../../../core/services/media.service';
 import { Message, AuthResponse, SignalRMessage, User } from '../../../core/models';
+import { UiStateService } from '../../../core/services/ui-state.service';
 import { UserProfileModalComponent } from '../user-profile-modal.component';
 
 @Component({
@@ -51,7 +52,8 @@ export class DirectMessageComponent implements OnInit, OnDestroy {
     private messageService: MessageService,
     private mediaService: MediaService,
     private router: Router,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    public uiState: UiStateService
   ) {}
 
   ngOnInit(): void {
@@ -293,5 +295,9 @@ export class DirectMessageComponent implements OnInit, OnDestroy {
   onMessageUser(userId: number): void {
     if (userId === this.receiverId) return;
     this.router.navigate(['/chat/dm', userId]);
+  }
+
+  toggleSidebar(): void {
+    this.uiState.toggleSidebar();
   }
 }

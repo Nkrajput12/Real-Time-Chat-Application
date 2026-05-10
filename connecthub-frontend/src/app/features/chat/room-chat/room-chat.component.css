@@ -5,6 +5,12 @@
       padding: 0 20px; height: 60px; min-height: 60px;
       background: var(--bg-secondary); border-bottom: 1px solid var(--border-color);
     }
+    .mobile-menu-btn { display: none; }
+    
+    @media (max-width: 768px) {
+      .mobile-menu-btn { display: flex; margin-right: -4px; }
+      .members-panel { position: absolute; right: 0; top: 60px; height: calc(100% - 60px); z-index: 90; box-shadow: var(--shadow-lg); }
+    }
     .room-icon {
       width: 36px; height: 36px; border-radius: 10px;
       background: var(--bg-card); border: 1px solid var(--border-color);

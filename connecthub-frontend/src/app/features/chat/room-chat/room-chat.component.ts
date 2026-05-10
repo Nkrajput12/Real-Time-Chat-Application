@@ -9,6 +9,7 @@ import { MessageService } from '../../../core/services/message.service';
 import { RoomService } from '../../../core/services/room.service';
 import { MediaService } from '../../../core/services/media.service';
 import { Message, ChatRoom, RoomMember, AuthResponse, SignalRMessage, User } from '../../../core/models';
+import { UiStateService } from '../../../core/services/ui-state.service';
 import { UserProfileModalComponent } from '../user-profile-modal.component';
 
 @Component({
@@ -51,7 +52,8 @@ export class RoomChatComponent implements OnInit, OnDestroy {
     private roomService: RoomService,
     private mediaService: MediaService,
     private router: Router,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    public uiState: UiStateService
   ) {}
 
   get isRoomAdmin(): boolean {
@@ -274,5 +276,9 @@ export class RoomChatComponent implements OnInit, OnDestroy {
       },
       error: () => alert('Failed to delete message. Permissions denied.')
     });
+  }
+
+  toggleSidebar(): void {
+    this.uiState.toggleSidebar();
   }
 }
