@@ -1,6 +1,0 @@
-@ConnectHub.Message_HostAddress = http://localhost:5153
-
-GET {{ConnectHub.Message_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###
