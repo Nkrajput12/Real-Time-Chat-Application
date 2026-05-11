@@ -21,7 +21,7 @@
       .mobile-menu-btn { display: flex; margin-right: -4px; }
     }
 
-    .messages-area { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 4px; }
+    .messages-area { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 4px; scroll-behavior: smooth; }
 
     .msg-row { display: flex; align-items: flex-end; gap: 8px; animation: fadeIn 0.2s ease; }
     .msg-row.outgoing { flex-direction: row-reverse; }

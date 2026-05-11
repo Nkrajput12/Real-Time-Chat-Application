@@ -16,7 +16,7 @@
       background: var(--bg-card); border: 1px solid var(--border-color);
       display: flex; align-items: center; justify-content: center; font-size: 1.1rem;
     }
-    .messages-area { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 4px; }
+    .messages-area { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 4px; scroll-behavior: smooth; }
     .msg-row { display: flex; align-items: flex-end; gap: 8px; animation: fadeIn 0.2s ease; }
     .msg-row.mine { flex-direction: row-reverse; }
     .sender-avatar {

@@ -69,10 +69,10 @@ img{display:block;max-width:100%}
 button{cursor:pointer;font-family:inherit}
 input,textarea,select{font-family:inherit;font-size:14px}
 
-::-webkit-scrollbar{width:5px;height:5px}
-::-webkit-scrollbar-track{background:transparent}
-::-webkit-scrollbar-thumb{background:var(--border);border-radius:99px}
-::-webkit-scrollbar-thumb:hover{background:var(--text-muted)}
+::-webkit-scrollbar{width:8px;height:8px}
+::-webkit-scrollbar-track{background:rgba(0,0,0,0.02)}
+::-webkit-scrollbar-thumb{background:rgba(108,99,255,0.25);border-radius:99px;border:2px solid transparent;background-clip:padding-box}
+::-webkit-scrollbar-thumb:hover{background:rgba(108,99,255,0.5);background-clip:padding-box}
 
 .auth-wrapper{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:1.5rem;background:var(--bg-primary);background-image:radial-gradient(ellipse at 20% 50%,rgba(108,99,255,0.08) 0%,transparent 60%),radial-gradient(ellipse at 80% 20%,rgba(108,99,255,0.05) 0%,transparent 50%)}
 .auth-card{background:var(--bg-secondary);border:1px solid var(--border);border-radius:var(--radius-xl);padding:2.5rem;width:100%;max-width:420px;box-shadow:var(--shadow-lg)}
@@ -188,8 +188,8 @@ input,textarea,select{font-family:inherit;font-size:14px}
 .recipient-status{font-size:0.75rem;color:var(--text-muted);margin-top:1px}
 .typing-status{color:var(--accent);font-style:italic}
 .header-actions{display:flex;gap:0.25rem}
-.messages-area{flex:1;overflow-y:auto;padding:1rem 1rem 0.5rem;display:flex;flex-direction:column}
-.messages-list{display:flex;flex-direction:column;gap:0.25rem;margin-top:auto}
+.messages-area{flex:1;overflow-y:auto;padding:1rem 1rem 0.5rem;display:flex;flex-direction:column;scroll-behavior:smooth}
+.messages-list{display:flex;flex-direction:column;gap:0.25rem;margin-top:auto;min-height:min-content}
 .room-content-area{flex:1;display:flex;overflow:hidden}
 .room-content-area .messages-area{flex:1}
 .members-panel{width:220px;background:var(--bg-secondary);border-left:1px solid var(--border);overflow-y:auto;flex-shrink:0}
