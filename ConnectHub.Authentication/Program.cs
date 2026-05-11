@@ -27,6 +27,13 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<PasswordHasher<User>>();
 builder.Services.AddScoped<IOAuthService, OAuthService>();
 
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders = ForwardedHeaders.All;
+    options.KnownNetworks.Clear();
+    options.KnownProxies.Clear();
+});
+
 
 //Authentication
 builder.Services.AddAuthentication(options =>
@@ -146,6 +153,22 @@ using (var scope = app.Services.CreateScope())
 
 
 
+
+app.UseForwardedHeaders();
+
+// Force HTTPS scheme for redirected URLs (like Google OAuth)
+app.Use((context, next) =>
+{
+    if (context.Request.Headers.ContainsKey("X-Forwarded-Proto"))
+    {
+        context.Request.Scheme = context.Request.Headers["X-Forwarded-Proto"];
+    }
+    else if (!app.Environment.IsDevelopment())
+    {
+        context.Request.Scheme = "https";
+    }
+    return next();
+});
 
 app.UseMiddleware<GlobalExceptionMiddleware>();
 
