@@ -8,5 +8,7 @@ FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
 WORKDIR /app
 COPY --from=build /app/publish .
 ENV ASPNETCORE_URLS=http://+:10000
+ENV DOTNET_USE_POLLING_FILE_WATCHER=true
+ENV ASPNETCORE_hostBuilderContext_reloadConfigOnChange=false
 EXPOSE 10000
 ENTRYPOINT ["dotnet", "ConnectHub.Messaging.dll"]
