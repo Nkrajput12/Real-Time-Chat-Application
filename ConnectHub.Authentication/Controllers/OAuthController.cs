@@ -47,7 +47,7 @@ public class OAuthController : ControllerBase
     {
         var configuration = HttpContext.RequestServices.GetService<IConfiguration>();
         var frontendBaseUrl = configuration?["FrontendUrl"] ?? "http://localhost:4200";
-        var frontendUrl = $"{frontendBaseUrl}/auth/login?token={token}&user={userName}&userId={userId}";
+        var frontendUrl = $"{frontendBaseUrl}/#/auth/login?token={token}&user={userName}&userId={userId}";
         return Redirect(frontendUrl);
     }
 }
