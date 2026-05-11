@@ -1,3 +1,4 @@
+:host { display: block; height: 100%; width: 100%; overflow: hidden; }
 .dm-container { display: flex; flex-direction: column; height: 100%; background: var(--bg-primary); }
 
     .chat-header {
