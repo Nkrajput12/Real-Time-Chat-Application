@@ -16,6 +16,8 @@ COPY --from=build /app/publish .
 
 # Render dynamic port support
 ENV ASPNETCORE_URLS=http://+:10000
+ENV DOTNET_USE_POLLING_FILE_WATCHER=true
+ENV ASPNETCORE_hostBuilderContext_reloadConfigOnChange=false
 EXPOSE 10000
 
 ENTRYPOINT ["dotnet", "ConnectHub.Authentication.dll"]
